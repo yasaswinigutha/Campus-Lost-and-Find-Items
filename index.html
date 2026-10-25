@@ -1,0 +1,54 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Lost & Found</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo">CampusFind</a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="#how-it-works">How It Works</a>
+            <a href="#report">Report an Item</a>
+        </div>
+    </nav>
+
+    <main class="hero">
+        <p class="tagline">YOUR CAMPUS, CONNECTED</p>
+        <h1>Lost something?<br><span>Let's find it together.</span></h1>
+        <p class="description">
+            A simple campus platform to report lost belongings,
+            find discovered items, and reconnect people with what matters.
+        </p>
+        
+<div class="buttons">
+    <a href="{{ url_for('report') }}" class="btn primary">
+        Report Lost Item
+    </a>
+    <a href="{{ url_for('report') }}" class="btn secondary">
+        Report Found Item
+    </a>
+</div>
+
+
+        <section id="how-it-works" class="info">
+            <h2>How it works</h2>
+            <p>Report an item, browse listings, and connect with its owner.</p>
+        </section>
+
+        <section id="report" class="info">
+            <h2>Ready to get started?</h2>
+            <p>Item reporting forms and student accounts are coming next.</p>
+        </section>
+    </main>
+
+    <footer>
+        <p>CampusFind · Helping campus belongings find their way home.</p>
+    </footer>
+</body>
+</html>
