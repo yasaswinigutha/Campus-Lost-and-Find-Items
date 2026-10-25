@@ -1,0 +1,286 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lost and Found Items | CampusFind</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #243047;
+        }
+
+        nav {
+            background: #183153;
+            padding: 18px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-right: 14px;
+            font-weight: bold;
+        }
+
+        nav .brand { font-size: 23px; }
+
+        .container {
+            width: 92%;
+            max-width: 1150px;
+            margin: 35px auto;
+        }
+
+        h1, h2 { color: #183153; }
+
+        .subtitle { color: #667085; }
+
+        .search-panel {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            margin: 24px 0;
+        }
+
+        .filter-form {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 12px;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 7px;
+            font-size: 14px;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .clear-link {
+            display: inline-block;
+            margin-top: 13px;
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .item-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .item-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            overflow: hidden;
+            border-top: 4px solid #2563eb;
+        }
+
+        .item-photo {
+            width: 100%;
+            height: 210px;
+            object-fit: contain;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin: 12px 0;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 0 5px 8px 0;
+        }
+
+        .lost { background: #fee2e2; color: #991b1b; }
+        .found { background: #dcfce7; color: #166534; }
+        .category { background: #e0e7ff; color: #3730a3; }
+
+        .detail {
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+
+        .empty-state {
+            background: white;
+            text-align: center;
+            padding: 40px 20px;
+            border-radius: 12px;
+        }
+
+        .primary-link {
+            display: inline-block;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            padding: 12px 16px;
+            border-radius: 7px;
+            margin: 8px;
+        }
+
+        footer {
+            text-align: center;
+            color: #667085;
+            padding: 25px;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 800px) {
+            .filter-form { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a class="brand" href="{{ url_for('home') }}">CampusFind</a>
+        <div>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('items', type='lost') }}">Lost Items</a>
+            <a href="{{ url_for('items', type='found') }}">Found Items</a>
+            <a href="{{ url_for('report') }}">Report an Item</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <h1>{{ page_title|default('Lost and Found Items') }}</h1>
+        <p class="subtitle">
+            Search reports and help belongings find their way home.
+        </p>
+
+        <section class="search-panel">
+            <form method="GET"
+                  action="{{ url_for('items') }}"
+                  class="filter-form">
+
+                <input
+                    type="text"
+                    name="search"
+                    placeholder="Search name or description..."
+                    value="{{ search|default('') }}"
+                >
+
+                <select name="type">
+                    <option value="">All reports</option>
+                    <option value="lost"
+                        {% if selected_type == 'lost' %}selected{% endif %}>
+                        Lost items
+                    </option>
+                    <option value="found"
+                        {% if selected_type == 'found' %}selected{% endif %}>
+                        Found items
+                    </option>
+                </select>
+
+                <select name="category">
+                    <option value="">All categories</option>
+                    {% for cat in [
+                        'Electronics',
+                        'Books and Notes',
+                        'Identity Cards',
+                        'Bags and Accessories',
+                        'Clothing',
+                        'Keys',
+                        'Other'
+                    ] %}
+                        <option value="{{ cat }}"
+                            {% if selected_category == cat %}selected{% endif %}>
+                            {{ cat }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit">Search</button>
+            </form>
+
+            <a class="clear-link" href="{{ url_for('items') }}">
+                Clear filters
+            </a>
+        </section>
+
+        <h2>Item Reports ({{ items|length }})</h2>
+
+        {% if items %}
+            <section class="item-grid">
+                {% for item in items %}
+                    <article class="item-card">
+                        <span class="badge {{ item.item_type }}">
+                            {{ item.item_type }}
+                        </span>
+
+                        <span class="badge category">
+                            {{ item.category }}
+                        </span>
+
+                        {% if item.image_filename %}
+                            <img
+                                class="item-photo"
+                                src="{{ url_for('static', filename='uploads/' ~ item.image_filename) }}"
+                                alt="Photo of {{ item.title }}"
+                                loading="lazy"
+                            >
+                        {% endif %}
+
+                        <h2>{{ item.title }}</h2>
+
+                        <p class="detail">
+                            <strong>Location:</strong>
+                            {{ item.location }}
+                        </p>
+
+                        <p class="detail">
+                            <strong>Description:</strong><br>
+                            {{ item.description }}
+                        </p>
+
+                        {% if item.created_at %}
+                            <p class="detail">
+                                <strong>Reported:</strong>
+                                {{ item.created_at.strftime('%d %b %Y, %I:%M %p') }}
+                            </p>
+                        {% endif %}
+                    </article>
+                {% endfor %}
+            </section>
+        {% else %}
+            <section class="empty-state">
+                <h2>No items found</h2>
+                <p>Try another search or clear the filters.</p>
+
+                <a class="primary-link" href="{{ url_for('items') }}">
+                    View All Reports
+                </a>
+
+                <a class="primary-link" href="{{ url_for('report') }}">
+                    Report an Item
+                </a>
+            </section>
+        {% endif %}
+    </main>
+
+    <footer>
+        CampusFind — Helping belongings find their way home.
+    </footer>
+</body>
+</html>
